@@ -41,6 +41,7 @@ def get_and_save_report(processes):
     date_time_string = now.strftime("%d-%m-%Y-%H:%M")
     filename = f"{date_time_string}-scan.txt"
 
+    # file output
     with open(filename, "w") as file:
         file.write(f'System status report: {date_time_string}\n\n')
         file.write('Users: ' + ', '.join(map(lambda u: f"'{u}'", unique_users)) + '\n\n')
@@ -54,9 +55,21 @@ def get_and_save_report(processes):
         file.write(f'Memory usage: {sum_mem:.1f}%\n')
         file.write(f'CPU usage: {sum_cpu:.1f}%\n\n')
 
-        file.write('Process with highest memory usage: ' + max_cpu_command[:20] + '\n')
-        file.write('Process with highest CPU usage: ' + max_mem_command[:20] + '\n')
+        file.write('Process with highest memory usage: ' + max_mem_command[:20] + '\n')
+        file.write('Process with highest CPU usage: ' + max_cpu_command[:20] + '\n')
 
+    # console output
+    print(f'System status report: {date_time_string}' + '\n')
+    print('Users: ' + ', '.join(map(lambda u: f"'{u}'", unique_users)) + '\n')
+    print('Total number of processes: ' + str(len(processes)) + '\n')
+    print('User processes:')
+    for user_name, process_count in user_process.items():
+        print(f'{user_name}: {process_count}')
+    print('\n')
+    print(f'Memory usage: {sum_mem:.1f}%')
+    print(f'CPU usage: {sum_cpu:.1f}%' + '\n')
+    print('Process with highest memory usage: ' + max_mem_command[:20])
+    print('Process with highest CPU usage: ' + max_cpu_command[:20])
 
 if __name__ == '__main__':
     processes = get_processes()
