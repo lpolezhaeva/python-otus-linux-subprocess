@@ -5,10 +5,15 @@ from collections import defaultdict
 
 def get_processes():
     encoding = 'utf-8'
-    output = subprocess.Popen(['ps', 'aux'], stdout=subprocess.PIPE).stdout.readlines()
-    headers = output[0].decode(encoding).strip().split()
-    raw_data = map(lambda s: s.decode(encoding).strip().split(maxsplit=len(headers) - 1), output[1:])
+    _output = subprocess.Popen(['ps', 'aux'], stdout=subprocess.PIPE).stdout.readlines()
+    headers = _output[0].decode(encoding).strip().split()
+    raw_data = map(lambda s: s.decode(encoding).strip().split(maxsplit=len(headers) - 1), _output[1:])
     return [dict(zip(headers, r)) for r in raw_data]
+
+
+def output(message, file):
+    print(message)
+    file.write(message + "\n")
 
 
 def get_and_save_report(processes):
@@ -41,35 +46,21 @@ def get_and_save_report(processes):
     date_time_string = now.strftime("%d-%m-%Y-%H:%M")
     filename = f"{date_time_string}-scan.txt"
 
-    # file output
     with open(filename, "w") as file:
-        file.write(f'System status report: {date_time_string}\n\n')
-        file.write('Users: ' + ', '.join(map(lambda u: f"'{u}'", unique_users)) + '\n\n')
-        file.write('Total number of processes: ' + str(len(processes)) + '\n\n')
+        output(f'System status report: {date_time_string}\n', file)
+        output('Users: ' + ', '.join(map(lambda u: f"'{u}'", unique_users)) + '\n', file)
+        output('Total number of processes: ' + str(len(processes)) + '\n', file)
 
-        file.write('User processes: \n')
+        output('User processes: ', file)
         for user_name, process_count in user_process.items():
-            file.write(f'{user_name}: {process_count} \n')
+            output(f'{user_name}: {process_count}', file)
 
-        file.write('\n')
-        file.write(f'Memory usage: {sum_mem:.1f}%\n')
-        file.write(f'CPU usage: {sum_cpu:.1f}%\n\n')
+        output(f'Memory usage: {sum_mem:.1f}%', file)
+        output(f'CPU usage: {sum_cpu:.1f}%\n', file)
 
-        file.write('Process with highest memory usage: ' + max_mem_command[:20] + '\n')
-        file.write('Process with highest CPU usage: ' + max_cpu_command[:20] + '\n')
+        output('Process with highest memory usage: ' + max_mem_command[:20], file)
+        output('Process with highest CPU usage: ' + max_cpu_command[:20], file)
 
-    # console output
-    print(f'System status report: {date_time_string}' + '\n')
-    print('Users: ' + ', '.join(map(lambda u: f"'{u}'", unique_users)) + '\n')
-    print('Total number of processes: ' + str(len(processes)) + '\n')
-    print('User processes:')
-    for user_name, process_count in user_process.items():
-        print(f'{user_name}: {process_count}')
-    print('\n')
-    print(f'Memory usage: {sum_mem:.1f}%')
-    print(f'CPU usage: {sum_cpu:.1f}%' + '\n')
-    print('Process with highest memory usage: ' + max_mem_command[:20])
-    print('Process with highest CPU usage: ' + max_cpu_command[:20])
 
 if __name__ == '__main__':
     processes = get_processes()
